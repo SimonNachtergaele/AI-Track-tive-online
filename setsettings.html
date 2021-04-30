@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+{% block head %}
+
+<script type = "text/javascript" >  
+  function preventBack() { window.history.forward(); }  
+  setTimeout("preventBack()", 0);  
+  window.onunload = function () { null };  
+</script>
+
+{% endblock %}
+{% block body %}
+
+<style>
+
+canvas {  /* geen scrollbars */
+        display:block;   
+        cursor: crosshair;
+        border: 1px solid #ac0d0d;
+        }
+
+</style>
+
+<div class="bg-secondary text-white">
+  <div class="m-4 pb-5 bg-secondary text-white" >
+
+    <form action="/aitracktive" enctype="multipart/form-data" method="POST">
+
+      <h5> Automatic track counting </h5>
+      
+      <div class = "row">
+        <div class="col-sm-10">
+          <label> Mineral {{ form.mineral (class="form-control", id="selector")}}  </label>
+        </div>
+      </div>
+
+      <div class ="row" id="row1">
+        <div class = 'col-sm-20'>
+          <label> Apatite: transmitted light image (jpg only) <input type='file' name="pic" id ="pic"/> </label>         
+        </div>
+        <div class = 'col-sm-20'>
+          <label> Apatite: transmitted light image for z-stack (jpg only) <i>(optional)</i> <input type='file' name="picz" id="picz"/>  </label>
+        </div>
+        <div class = 'col-sm-20'>
+          <label> Apatite: reflected light image (jpg only) <i>(optional) </i> <input type='file' name="pic_epi" id ="pic_epi"/> </label>
+        </div>
+      </div>
+
+
+      <div class ="row" id="row2">
+        <div class = 'col-sm-20'>
+          <label> Mica: transmitted light image (jpg only): <input type='file' name="mica"/> </label>
+        </div>
+        <div class = 'col-sm-20'>
+          <label> Mica: transmitted light image for z-stack (jpg only) <i>(optional)</i> <input type='file' name="micaz"/> </label>
+        </div>
+        <div class = 'col-sm-20'>
+          <label> Mica: reflected light image (jpg only) <i>(optional)</i> <input type='file' name="mica_epi"/>  </label>
+        </div>
+      </div>
+
+      <div class ="row">
+        <div class="col-sm-8">
+          <label> Enter your sample name {{ form.name(class="form-control")}} </label>
+        </div>
+      </div>
+
+      <div class ="row">
+        <div class="col-sm-8">
+          <label> Select mask or region of interest (ROI) {{ form.roi(class="form-control", id="selector2") }} </label>
+        </div>
+      </div>
+
+      <div class ="row">
+        <div class="col-sm-3">
+          <label>Enter the width of your uploaded picture (in µm) {{ form.widthm (class="form-control")}}  </label>
+        </div>
+        <div class="col-sm-3">
+          <label> Enter the width of your uploaded picture (in pixels) {{ form.widthpx (class="form-control") }} </label>
+        </div>
+      </div>
+
+      <div class ='row'> 
+        <div class="col-sm-3">
+          <label> Microscope brand and type (optional) {{ form.ms (class="form-control")}} </label>
+        </div>
+        <div class="col-sm-3">
+          <label> Your screen resolution is automatically filled in below {{ form.resolution(class="form-control") }} </label>
+        </div>      
+      </div>
+
+      <div class = 'row' id = 'row5'>
+        <div class="col-sm-20">
+          <label> Select your Deep Neural Network for Apatite {{ form.dnnap(class="form-control") }}  </label>
+        </div>
+      </div>
+
+      <div class = 'row' id = 'row6'>
+        <div class="col-sm-20">
+          <label> Select your Deep Neural Network for Mica {{ form.dnnmica(class="form-control") }} </label>
+        </div>
+      </div>
+
+      <br>
+
+      <input type="submit" name="submit_button" onclick="form.submit()" value="Start application*"><br>
+
+      <label> <i> *By starting the application I agree to the <a href="/termsofuse" style="color:#00336e;"> terms of use </a> </i> </label>
+     
+    
+      <!-- Rest is for polygonal mask drawing -->
+      <div class='row' id='row3' >
+        <p> Only when using polygonal ROI/mask: <br>
+        <label for="file" style="cursor: pointer;"> <u> 1. Upload Image </u> </label> <br>
+        <label for="chkpoly"> 2. Show image by clicking on the checkbox</label> 
+        <input type="checkbox" id="chkpoly" onclick="myCanvasfunction();"/> <br>
+        3. Draw polygon using left mouse button. Doubleclick on your last point to end and obtain the coordinates. <br></p>
+    
+        <div class ='row'> 
+          <div class="col-sm-8">
+            <p> {{ form.polygoncoords(class="form-control") }} </p>
+          </div>
+        </div>
+      </div>
+
+      <div class = 'row' id ='row4'>
+        <canvas id="myCanvas" width="2000" height="2000" style="border:1px solid #d3d3d3;"> Your browser does not support the HTML canvas tag. </canvas>
+      </div>
+
+      <div class = 'row' id ='row7'>
+        <label><input type="file"  accept="image/*" name="image" id="file" onchange="loadFile(event)"></label>  
+        <img id="output" width="200" src=# alt='hidden image'/>
+      </div>
+      
+
+    </form>
+
+    <script>
+
+      // DOM Content Loaded
+      document.addEventListener("DOMContentLoaded", function() {
+        // Get variables
+        let row1 = document.getElementById("row1");
+        let row2 = document.getElementById("row2");
+        let row3 = document.getElementById("row3");
+        let row4 = document.getElementById("row4");
+        let row5 = document.getElementById("row5");
+        let row6 = document.getElementById("row6");
+        let row7 = document.getElementById("row7");
+
+        // Show the usual variables in order to get the offset of mycanvas later 
+        row1.style.display = "table-row";
+        row2.style.display = "none";
+        row3.style.display = "table-row";
+        row4.style.display = "table-row";
+        row5.style.display = "table-row";
+        row6.style.display = "none";
+        row7.style.display = "none";
+
+        // Now I need the offset of MyCanvas (row4) 
+        canvasx = row4.offsetLeft;
+        canvasy = row4.offsetTop;
+        console.log('canvas x is...');
+        console.log(canvasx);
+        console.log('canvas y is...');
+        console.log(canvasy);
+
+        // Hide them again
+        row1.style.display = "none";
+        row2.style.display = "none";
+        row3.style.display = "none";
+        row4.style.display = "none";
+        row5.style.display = "none";
+        row6.style.display = "none";
+        row7.style.display = "none";
+
+      })
+
+      // Hide all rows
+      function hideAll() {
+        row1.style.display = "none";
+        row2.style.display = "none";
+        row3.style.display = "none";
+        row4.style.display = "none";
+        row5.style.display = "none";
+        row6.style.display = "none";
+        row7.style.display = "none";
+      }
+
+      // Hide the rows from the specific polygonal function
+      function hideAllPolygonal() {
+        row3.style.display = "none";
+        row4.style.display = "none";
+      }
+
+      // Make sure to hide them again
+      hideAll();
+      
+      // function 
+      document.addEventListener('input', function (ev) {
+        // Only run on our selector menu
+        if (ev.target.id !== "selector") return;
+
+        // The selected value
+        let option = ev.target.value;
+        console.log('method is...');
+        console.log(option);
+
+        switch(option) {
+          case 'laft':
+            console.log("Apatite selected");
+            hideAll();
+            row1.style.display = "table-row"; // display apatite images selection
+            row5.style.display = "table-row"; // display dnn apatite selection
+            console.log('case 1: laft')
+            break;
+
+          case 'glass':
+            console.log("Mica/glass selected");
+            hideAll();
+            row2.style.display = "table-row"; // display mica images selection
+            row6.style.display = "table-row"; // display dnn mica select 
+            console.log('case 2: glass')
+            break;
+
+          case 'annotate':
+            console.log("Annotate option selected");
+            hideAll();
+            row2.style.display = "table-row"; // display mica images select 
+            console.log('case 3: annotate') 
+            break;
+
+          default:
+            hideAll();
+            break;
+        
+          }
+      })
+
+      // Reaction when custom-drawn polygon has been chosen 
+      // Start with add event listener
+      document.addEventListener('input', function (ev) {
+
+      // Only run on our selector menu
+      if (ev.target.id !== "selector2") return;
+
+      // The selected value
+      let optionroi = ev.target.value;
+      console.log('roi is ...');
+      console.log(optionroi);
+
+      switch(optionroi) {
+        case 'polygon':
+          console.log("Polygon selected"); 
+          hideAllPolygonal();
+          row3.style.display = "table-row";
+          row4.style.display = "table-row";
+          console.log('case 3:polygon');
+          break;
+          
+        default:
+          hideAllPolygonal();
+          break;
+        }   
+      })
+
+      // Get screen resolution
+      var res = "";
+      res += screen.width + "*" + screen.height;
+      document.getElementById("txtres").value = res; //could not find what's wrong with txtres because it refers to the app
+      console.log(res)
+
+      // Show canvas
+      function myCanvasfunction() {
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        var img = document.getElementById("output");
+        ctx.drawImage(img,0,0);  
+      }
+
+      // Displays an image that's uploaded
+      var loadFile = function(event) {
+        var image = document.getElementById('output');
+        image.src = URL.createObjectURL(event.target.files[0]);
+      };
+
+      // // When space bar is hit, show the rectangles for the polygon
+      // window.addEventListener("keyup", function(e) {
+      //         e.preventDefault();
+      //         if(e.keyCode == 32) showRectArrays();
+      //         // if(e.keyCode == 32) form.polygoncoords == showRectArrays; // see if this works...
+      // });
+
+      // When space bar is hit, show the rectangles for the polygon
+      window.addEventListener("dblclick", function(e) {
+        showRectArrays();
+        ctx.fillStyle = "#FF0000"; // color line
+
+        //now get the first point of array 
+        first_coord = coords[0];
+        first_coordx = first_coord[0];
+        first_coordy = first_coord[1];
+
+        ctx.beginPath();
+        ctx.moveTo(last_mousex,last_mousey); // starting point of the line
+        
+        ctx.lineTo(first_coordx,first_coordy); // draw line to this place
+        ctx.closePath(); //stop path
+        ctx.stroke(); //draw
+        
+        last_mousex = mousex ;
+        last_mousey = mousey ;
+
+
+      });
+
+      // function to show rectangles
+      function showRectArrays() {
+                let str = JSON.stringify(coords);
+                document.getElementById("txtpolygoncoords").value = str;
+            }
+
+      //Canvas
+      var canvas = document.getElementById('myCanvas');  
+      var ctx = canvas.getContext('2d');
+      
+      //Variables
+      var last_mousex = last_mousey = 0;
+      var mousex = mousey = 0;
+      var mousedown = false;
+      var coords = new Array();
+      var len = 0;
+      var s = 0;
+      var height = screen.height;
+
+      //Mousedown
+      $(canvas).on('mousedown', function(e) {
+        mousex = parseInt(e.clientX - canvasx); 
+        mousey = parseInt(e.clientY - canvasy + s );
+        console.log(' ');
+        console.log('e clienty');
+        console.log(e.clientY);
+        console.log('canvasy');
+        console.log(canvasy);
+        console.log('window.pageYOffset');
+        console.log(s);
+        console.log('mousey');
+        console.log(mousey);
+
+        c = [mousex,mousey];
+        coords.push(c);
+        //console.log(coords);
+      });
+
+      //Mouseup
+      $(canvas).on('mouseup', function(e) {
+        mousedown = false;
+        mousex = parseInt(e.clientX - canvasx); 
+        mousey = parseInt(e.clientY - canvasy + s ); 
+
+      if (mousedown==false) { 
+          if (len == 0) { 
+              // ctx.fillStyle = "#FF0000"; // color line
+              // ctx.beginPath();
+              // ctx.moveTo(last_mousex,last_mousey); // starting point of the line
+              // ctx.lineTo(mousex,mousey); // draw line to this place
+              // ctx.closePath(); //stop path
+              // ctx.stroke(); //draw
+              
+              last_mousex = mousex ;
+              last_mousey = mousey ;
+              len = 1; //when it's not anymore the first point that we're appending
+          }
+          
+          if (len !=0) {
+
+            ctx.fillStyle = "#FF0000"; // color line
+            ctx.beginPath();
+            ctx.moveTo(last_mousex,last_mousey); // starting point of the line
+            ctx.lineTo(mousex,mousey); // draw line to this place
+            ctx.closePath(); //stop path
+            ctx.stroke(); //draw
+            
+            last_mousex = mousex ;
+            last_mousey = mousey ;
+          }
+        }
+      });
+
+      //Mousemove
+      $(canvas).on('mousemove', function(e) {
+        mousex = parseInt(e.clientX - canvasx); 
+        s = window.pageYOffset;
+        mousey = parseInt(e.clientY - canvasy + s ); 
+        });
+
+      // Get device zoom
+      var resscale = window.devicePixelRatio;
+      console.log('resscale');
+      console.log(resscale);
+      console.log('res is');
+      console.log(res);
+
+      // Try with fetch source: https://www.youtube.com/watch?v=QKcVjdLEX_s
+      function submit_entry() {
+
+        var width = 0.70 * screen.height; // get width of the resized image 
+        var entry = {
+            width: width,
+            res: res,
+        };
+        console.log('entry comes below...');
+        console.log(entry);
+
+        fetch ('/aitracktive', {
+          method: 'POST',
+          credentials: "include", //cookies
+          body: JSON.stringify(entry), 
+          cache: "no-cache",
+          headers: new Headers({
+              "content-type": "application/json"
+          })
+        });
+
+      };
+
+
+
+    </script>
+  </div>  
+</div>
+{% endblock %}

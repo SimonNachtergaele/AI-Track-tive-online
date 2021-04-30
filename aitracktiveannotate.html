@@ -1,0 +1,372 @@
+{% extends 'basetrackfinder.html' %}
+{% block head %}
+{% endblock %}
+{% block body %}
+
+<style>
+    * {
+    box-sizing: border-box;
+    }
+
+    /* Create two unequal columns that floats next to each other */
+    .column {
+    float: left;
+    padding: 10px;
+    }
+
+    .left {
+    width: 50%;
+    }
+
+    .right {
+    width: 50%;
+    }
+
+    /* Clear floats after the columns */
+    .row:after {
+    content: "";
+    display: table;
+    clear: both;
+    }
+
+    #img-container {
+        position: relative;
+        top: 0;
+        left: 0;
+        }
+
+    #front {
+        opacity:1;
+        position: relative;
+        top: 0;
+        left: 0;
+        border: 1px red solid;
+        }
+
+    #back {
+        position: absolute;
+        top: 0;
+        left: 0;
+        border: 1px green solid;
+        }
+        
+    #epi {
+        position: absolute;
+        top: 0;
+        left: 0;
+        border: 1px rgb(47, 75, 201) solid;
+        }
+
+    * { /* erases top & left whitespace */
+        margin:0;
+        padding:0;
+    }
+
+    html, body { /* force full screen*/
+        width:100%;
+        height:100%;
+    }
+
+    canvas {  /* no scrollbars */
+        display:block;   
+        cursor: crosshair;
+        border: 1px solid #ac0d0d;
+        }
+</style>
+
+<div class="bg-white text-black">
+    <div class="m-4 pb-5 bg-white text-black">
+        <div class='row'>
+            <div class='col-sm-6'>
+                <p> <b> Welcome to the manual review process. </b> <br>
+                    Please indicate the additional tracks by dragging rectangles using <b>left</b> mouse button. <br>
+                    Please indicate the false positives (misidentified tracks) by dragging rectangles using <b> right </b> mouse button
+                </p> 
+                <!-- source: https://stackoverflow.com/questions/42601478/flask-calling-python-function-on-button-onclick-event -->
+                <button type="button" onclick="submit_entry()" id="senddata" >Click here when ready </button>
+                <a href = {{ url_for('aitracktive2ndpage', filename = filename ) }} style="color:rgb(19, 39, 218);" id='link'> Download data and annotated image </a>
+
+                <canvas id="myCanvas" width = "" height = "" style="border:1px solid #d3d3d3;"> Your browser does not support the HTML5 canvas tag.</canvas>
+
+                <p> <a href="https://aitracktive.ugent.be/setsettings?" style="color:rgb(19, 39, 218);"> Analyse another grain </a> 
+                    <span class="output"></span>   
+                </p>
+        
+            </div>
+
+            <div class='col-sm-6t'>    
+                <p>
+                    If you have uploaded 3 images, it is now possible to use these to evaluate the mineral surface.  <br>
+                    Use the EPI/DIA switch to switch between reflected and transmitted light images. <br>
+                    Use the 'opacity' scrollbar to change gradually change the focal level of your imaginary microscope. 
+                </p>
+
+                <input type='text' class='form-control' id='name' value= {{ filename }} hidden>
+                <input type='text' class='form-control' id='mineral' value= {{ mineral }} hidden>
+
+                <label for="cross-fader">Opacity</label>
+                <input type="range" id="cross-fader" name="cross_fader" min="0" max="10" value="5" />
+                <span id="text-val"></span>
+              
+                <button id="change-front">EPI/DIA</button>
+                
+                <br>
+
+                <div id="img-container">
+                    <img id="front" src="{{ url_for('send_file', filename = filename) }}" alt='frontimage'>
+                    <img id="back" src="{{ url_for('send_file', filename = filenamez) }}" style="opacity: 0.5;" alt='backimage'>
+                    <img id="epi" src="{{ url_for('send_file', filename = filenameepi) }}" style = "opacity: 0;" alt='epiimage'>
+                </div>
+            </div>
+        </div>  
+                    
+        <div id="output">
+        </div>  
+        
+        <script>
+            window.onload = function() {
+                document.body.style.zoom = 1.00;
+                             
+                var canvassize = screen.height;
+                var canvas = document.getElementById("myCanvas");
+                var ctx = canvas.getContext("2d");
+
+                var ah = 0.70 * screen.height;
+                console.log('screen height is');
+                console.log(screen.height);
+                console.log('available height is...');
+                console.log(ah);
+                canvas.width = ah;
+                canvas.height = ah;
+                
+                var imgfront = document.getElementById("front");
+                ctx.drawImage(imgfront, 0, 0);
+                var canvasx = $(canvas).offset().left;
+                var canvasy = $(canvas).offset().top;
+                              
+                var imgfront = document.getElementById("front");
+                var imgback = document.getElementById("back");
+                var imgepi = document.getElementById("epi");
+            };      
+        
+            // Get zoom values from browser
+            window.addEventListener("resize", getSizes, false);
+            let out = document.querySelector(".output");
+    
+            function getSizes() {
+                let zoom = ((window.outerWidth - 10)/ window.innerWidth) * 100;
+                out.textContent = zoom;
+            };
+
+            // Get device zoom
+            var scale = window.devicePixelRatio;
+            console.log('scale');
+            console.log(scale);
+
+            // Get canvas 
+            var canvas = document.getElementById("myCanvas");
+            var ctx = canvas.getContext("2d");
+            canvasx = $(canvas).offset().left;
+            canvasy = $(canvas).offset().top;
+            var ah = 0.70 * screen.height;
+            
+            // Disable context menu on right click
+            window.addEventListener("contextmenu", function(e) { return e.preventDefault() }); //changed this for compatibility with Internet Explorer
+            
+            window.addEventListener("keyup", function(e) {
+                return e.preventDefault();
+                if(e.keyCode == 32) showRectArrays();
+            });
+
+
+            window.addEventListener("load", function() {
+                document.addEventListener("mousedown", startPainting);
+                document.addEventListener("mouseup", stopPainting);
+            });
+
+            // Array for green rectangles
+            let arrRed = [];
+            // Array for red rectangles
+            let arrGreen = [];
+            // Another array gathering both
+            let rectArr = [];
+
+            function getColor(e) {
+                if (typeof e === 'object') {
+                    switch (e.button) {case 0:
+                            // Left button clicked
+                            strokeColor = "#00FF00"; // Green
+                            rectArr = arrGreen;
+                            break;
+                        case 2:
+                            // Right button clicked
+                            strokeColor = "#FF0000"; // Red
+                            rectArr = arrRed;
+                            break;
+                        default:
+                        console.log = "Unknown button code: ${e.button}";
+                    };
+                };
+            };
+
+            // Store cursors' initial coordinates
+            let coord = { x:0, y:0 };
+
+            // Flag to trigger drawing
+            let paint = false;
+
+            // On event trigger: update coordinates of cursor to the coordinates where the event is triggerd
+            function getPosition(e) {
+                coord.x = e.clientX - canvasx;
+                coord.y = e.clientY - canvasy + window.pageYOffset;
+                console.log('here comes the position for Y (e.client Y, canvasy and yoffset');
+                console.log(e.clientY);
+                console.log(canvasy);
+                console.log(window.pageYOffset);         
+            };
+
+            // Toggle flag to start and stop painting
+            function startPainting(e) { // On mousedown
+                if (e.clientY - canvasy + window.pageYOffset < 0) {
+                    console.log('negative y starting location');
+                }
+
+                else if (e.clientX - canvasx < 0) {
+                    console.log('negative x starting location');
+                }
+
+                else if (e.clientY - canvasy + window.pageYOffset > ah) {
+
+                    console.log('too high starting location (y)');
+                }
+
+                else if (e.clientX - canvasx > ah) {
+                    console.log('too high starting location (x)');
+                }
+                
+                else {
+                    paint = true;
+                    getPosition(e);
+                }
+            }
+            
+            function stopPainting(e) { // On mouseup
+                if (e.clientY - canvasy + window.pageYOffset < 0) {
+                    console.log('negative y starting location');
+                }
+
+                else if (e.clientX - canvasx < 0) {
+                    console.log('negative x starting location');
+                }
+                
+                else if (e.clientY - canvasy + window.pageYOffset > ah) {
+                    console.log('too high starting location (y)');
+                }
+
+                else if (e.clientX - canvasx > ah) {
+                    console.log('too high starting location (x)');
+                }
+
+                else {
+                    paint = false;
+                    getColor(e);
+
+                    // Where are we?
+                    let endPos = { x: e.clientX - canvasx, y: e.clientY - canvasy + window.pageYOffset }; // removed Yoffset
+                    let width = endPos.x - coord.x;
+                    let height = endPos.y - coord.y;
+                    addRect(width, height);
+                }                
+            }
+
+            // Create a 'Shape' object
+            function Rect(x, y, w, h) {
+                this.x = x;
+                this.y = y;
+                this.w = w;
+                this.h = h;
+            }
+
+            function addRect(w, h) {
+                console.log('add rect function starts')
+                ctx.strokeStyle = strokeColor;
+                ctx.strokeRect(coord.x, coord.y, w, h);
+                
+                // Save rectangle
+                rectArr.push(new Rect(coord.x, coord.y, w, h));
+            }
+
+            function showRectArrays() {
+                let strRed = JSON.stringify(arrRed);
+                let strGreen = JSON.stringify(arrGreen);
+                alert("Red Rectangles:\n"+strRed+"\nGreen Rectangles:\n"+strGreen);
+            }
+
+            // Try with fetch source
+            function submit_entry() {
+                var name = document.getElementById('name');
+                var mineral = document.getElementById('mineral');
+                var width = 0.70 * screen.height; // get width of the resized image 
+                var entry = {
+                    width: width,
+                    mineral: mineral.value,
+                    name: name.value, 
+                    coords_fp: arrRed,
+                    coords_fn: arrGreen,
+                };
+
+                console.log(entry);
+
+                fetch ('/aitracktive2ndpage/name', {
+                    method: 'POST',
+                    credentials: "include", 
+                    body: JSON.stringify(entry), 
+                    cache: "no-cache",
+                    headers: new Headers({
+                        "content-type": "application/json"
+                    })
+                })
+            }
+
+            function xFade(val) {
+                let imgToFade = document.querySelector("#front");
+                let opac = parseFloat(val/10);
+                imgToFade.style.opacity = opac; //For real browsers;
+                imgToFade.style.filter = "alpha(opacity=\""+(opac*100)+"\""; //For IE;
+            }
+
+            // JQuery code for cross-fader (epi/dia and opacity thing)
+            $("#text-val").text(parseFloat($("#cross-fader").val()/10));
+            $("#cross-fader").mousemove(function () {
+                let rangeVal = $("#cross-fader").val();
+                $("#text-val").text(parseFloat(rangeVal/10));
+                xFade(rangeVal);
+            });
+
+            // Example change front image by button click
+            $("#change-front").on("click", function() {
+                var src_orig = $("#front").attr("src");
+                let src = $("#front").attr("src");
+                let srcz = $("#back").attr("src");
+                let srcepi = $("#epi").attr("src");
+
+                // If you are showing the z image 
+                if(src == srcepi) 
+                {
+                $("#front").attr("src", "{{ url_for('send_file', filename = filename) }}");
+                console.log('switched to src');
+                }
+
+                // If you are showing the other 
+                else
+                {
+                $("#front").attr("src", srcepi);
+                console.log('switched to srcepi');
+                }
+            });
+        </script>
+    </div>
+</div>
+
+{% endblock %}
+

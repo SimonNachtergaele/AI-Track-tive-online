@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+  
+{% block head %}
+{% endblock %}
+
+{% block body %}
+
+<div class="bg-secondary text-white">
+    <div class="m-4 pb-5 bg-secondary text-white" >
+        <div class="row">
+            <div class="col-sm-6" >
+                <h5> Before you start to develop your own DNN, make sure that... </h5>
+                <p> 
+                ... you have .jpg images. You can convert (and resize) your images. <br>
+                    In imageJ: click process > batch > convert and select output format 'JPEG' and set scale factor depending on your original image size. <br>
+                ... your images are approximately 1000 px on 1000 px size. I worked with square-shaped images. <br>
+                    If you have rectangular images, please contact me to make an update to the software. <br> 
+                </p>
+
+                <h5> How to train your own Deep Neural Network (DNN)? </h5>
+                <p> Step 1: Choose sample name and select method "annotate". <br>
+                Step 2: Choose region of interest: "full image". <br>
+                Step 3: Fill in other settings such as resolution and image width. <br>
+                Step 4: Click on select images for <b> mica </b> and select one transmitted light image. <br>
+                Step 5: Annotate all tracks using left mouse button and proceed. You will receive a zip file with a txt file and jpg file. <br>
+                Step 6: Repeat step 1 to 5 for ~50-100 images with different track densities. <br>
+                Contact the developer (Simon) and let him train the DNN <b> or </b> follow the instructions below <br>
+                Step 7: Make a zip-file with all txt, jpeg files. Add one file 'classes.txt' with content: "Track" <br>
+                Step 8: Remove all "" in the txt files (2 per txt file). <br>
+                Step 9: Upload the files to your Google Drive, open Jupyter notebook in <a href = "https://github.com/SimonNachtergaele/AI-Track-tive/blob/master/Train_YoloV3_.ipynb" style="color:#00336e;"> in Google Colab </a> and execute all. <br> 
+                Step 10: Contact Simon (Simon.Nachtergaele@UGent.be) to upload the DNN to AI-Track-tive.  
+                </p>
+            </div>
+
+            <div class="col-sm-6" >
+                <br>
+                <img src="https://media.wired.com/photos/5932672e5c4fbd732b552457/master/w_2560%2Cc_limit/MSDOS.jpg" alt="stupidpicture" width="600" height="500">
+                <br>
+            </div>
+        </div>      
+    </div>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block head %}
+{% endblock %}
+{% block body %}
+
+<div class="bg-secondary text-white">
+    <div class="m-5 pb-5 bg-secondary text-white" >
+        <b>Input error</b> <br>
+        {% if session.validation_error %}
+        {{ session.validation_error }} 
+        {% else %}
+            No error specified
+        {% endif %}
+        <br>
+        <a href="https://aitracktive.ugent.be/setsettings" style="color:#00336e;">Try again</a>
+        <!-- <button onclick="goBack()">Go Back</button>
+        <div id="demo"></div>    -->
+    </div>
+</div>
+
+<!-- <script>
+    function goBack() {
+        window.history.back();
+    }
+</script> -->
+{% endblock %}
