@@ -23,13 +23,13 @@ canvas {  /* geen scrollbars */
 <div class="bg-secondary text-white">
   <div class="m-4 pb-5 bg-secondary text-white" >
 
-    <form action="/aitracktive" enctype="multipart/form-data" method="POST">
+    <form id="myForm" action="/aitracktive" enctype="multipart/form-data" method="POST">
 
       <h5> Automatic track counting </h5>
       
       <div class = "row">
         <div class="col-sm-10">
-          <label> Mineral {{ form.mineral (class="form-control", id="selector")}}  </label>
+          <label onclick=ResetMyForm()> Mineral {{ form.mineral (class="form-control", id="selector")}}  </label>
         </div>
       </div>
 
@@ -48,19 +48,19 @@ canvas {  /* geen scrollbars */
 
       <div class ="row" id="row2">
         <div class = 'col-sm-20'>
-          <label> Mica: transmitted light image (jpg only): <input type='file' name="mica"/> </label>
+          <label> Mica: transmitted light image (jpg only): <input type='file' name="mica" id="mica"/> </label>
         </div>
         <div class = 'col-sm-20'>
-          <label> Mica: transmitted light image for z-stack (jpg only) <i>(optional)</i> <input type='file' name="micaz"/> </label>
+          <label> Mica: transmitted light image for z-stack (jpg only) <i>(optional)</i> <input type='file' name="micaz" id="micaz"/> </label>
         </div>
         <div class = 'col-sm-20'>
-          <label> Mica: reflected light image (jpg only) <i>(optional)</i> <input type='file' name="mica_epi"/>  </label>
+          <label> Mica: reflected light image (jpg only) <i>(optional)</i> <input type='file' name="mica_epi" id="mica_epi"/>  </label>
         </div>
       </div>
 
       <div class ="row">
         <div class="col-sm-8">
-          <label> Enter your sample name {{ form.name(class="form-control")}} </label>
+          <label> Enter your sample name {{ form.name(class="form-control", id="name")}} </label>
         </div>
       </div>
 
@@ -72,10 +72,10 @@ canvas {  /* geen scrollbars */
 
       <div class ="row">
         <div class="col-sm-3">
-          <label>Enter the width of your uploaded picture (in µm) {{ form.widthm (class="form-control")}}  </label>
+          <label>Enter the width of your uploaded picture (in µm) {{ form.widthm (class="form-control", id="width")}}  </label>
         </div>
         <div class="col-sm-3">
-          <label> Enter the width of your uploaded picture (in pixels) {{ form.widthpx (class="form-control") }} </label>
+
         </div>
       </div>
 
@@ -195,6 +195,24 @@ canvas {  /* geen scrollbars */
       // Make sure to hide them again
       hideAll();
       
+      function ResetMyForm() {
+        // Empty apatite pictures
+        document.getElementById("pic").value ="";
+        document.getElementById("picz").value ="";
+        document.getElementById("pic_epi").value ="";
+        // Empty mica pictures
+        document.getElementById("mica").value ="";
+        document.getElementById("micaz").value ="";
+        document.getElementById("mica_epi").value ="";
+        // Empty name
+        document.getElementById("name").value ="";
+        // Empty roi
+        document.getElementById("selector2").value ="";
+        // Empty width
+        document.getElementById("width").value ="";
+
+      }
+
       // function 
       document.addEventListener('input', function (ev) {
         // Only run on our selector menu
