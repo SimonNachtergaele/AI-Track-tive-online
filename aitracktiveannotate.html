@@ -127,20 +127,31 @@
             window.onload = function() {
                 document.body.style.zoom = 1.00;
                              
-                var canvassize = screen.height;
                 var canvas = document.getElementById("myCanvas");
                 var ctx = canvas.getContext("2d");
 
+                // Get available screen height
                 var ah = 0.70 * screen.height;
                 console.log('screen height is');
                 console.log(screen.height);
                 console.log('available height is...');
                 console.log(ah);
-                canvas.width = ah;
-                canvas.height = ah;
-                
+
+                // Get available screen width
+                console.log(screen.width);
+                console.log('available width is...');
+
+                // Get some parameters from the front image
                 var imgfront = document.getElementById("front");
+                // Get parameter height 
+                canvas.height = imgfront.height;
+                // Get parameter width
+                canvas.width = imgfront.width;
+                
+                // Finally draw the image
                 ctx.drawImage(imgfront, 0, 0);
+
+                // Calculate offset
                 var canvasx = $(canvas).offset().left;
                 var canvasy = $(canvas).offset().top;
                               
@@ -177,7 +188,6 @@
                 return e.preventDefault();
                 if(e.keyCode == 32) showRectArrays();
             });
-
 
             window.addEventListener("load", function() {
                 document.addEventListener("mousedown", startPainting);
@@ -306,9 +316,11 @@
             function submit_entry() {
                 var name = document.getElementById('name');
                 var mineral = document.getElementById('mineral');
-                var width = 0.70 * screen.height; // get width of the resized image 
+                var height = 0.70 * screen.height; // get width of the resized image 
+                var width = 0.70 * screen.width;
                 var entry = {
                     width: width,
+                    height: height,
                     mineral: mineral.value,
                     name: name.value, 
                     coords_fp: arrRed,
@@ -364,6 +376,9 @@
                 console.log('switched to srcepi');
                 }
             });
+
+
+
         </script>
     </div>
 </div>
