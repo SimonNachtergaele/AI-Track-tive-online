@@ -19,7 +19,8 @@ import cv2
 import logging
 import datetime
 from datetime import datetime
- 
+
+
 now = datetime.now()
 today = now.strftime("%Y%m%d")
 logging.basicConfig(level=logging.DEBUG,
@@ -52,7 +53,7 @@ class SettingsForm(Form):
     widthm = StringField("Enter the width (in µm) here", validators=[validators.InputRequired()]) # changed TextField to StringField
     
     # Width image pixels
-    widthpx = StringField("Enter the width (in pixels) here", validators=[validators.InputRequired()]) # changed TextField to StringField
+    #!# widthpx = StringField("Enter the width (in pixels) here", validators=[validators.InputRequired()]) # changed TextField to StringField
     
     # # Screen resolution
     resolution = StringField(validators=[validators.InputRequired()], id='txtres')
@@ -227,7 +228,7 @@ def main():
         mineral = request.form['mineral']
         widthm = request.form['widthm']
         logging.info('widthm is '+str(widthm))
-        widthpx = request.form['widthpx']
+        #!#widthpx = request.form['widthpx']
         customname = request.form['name']
         ms = request.form['ms']
         resolution = request.form['resolution']
@@ -301,18 +302,18 @@ def main():
             return render_template('error.html')
 
         # Check if we can make a float from widthm input
-        try:
-            widthpx = float(widthpx)
-        except:
-            logging.error('input widtpx is not a float or int')
-            session['validation_error'] = 'An error occurred: width in pixels is not a number like e.g. 105 or 101.5. Please reshape your input variable.'
-            return render_template('error.html')
+        #!# try:
+            #!# widthpx = float(widthpx)
+        #!# except:
+            #!# logging.error('input widtpx is not a float or int')
+            #!# session['validation_error'] = 'An error occurred: width in pixels is not a number like e.g. 105 or 101.5. Please reshape your input variable.'
+            #!# return render_template('error.html')
 
         # If there was no width given
-        if widthpx == '':
-            logging.error('no width (px) was specified')
-            session['validation_error'] = 'An error occurred: no width (in pixels) was specified'
-            return render_template('error.html')
+        #!# if widthpx == '':
+            #!# logging.error('no width (px) was specified')
+            #!# session['validation_error'] = 'An error occurred: no width (in pixels) was specified'
+            #!# return render_template('error.html')
 
         # If no images were given, give an error
         if request.files['pic'].filename == '' and request.files['mica'].filename == '':
@@ -324,8 +325,6 @@ def main():
         # Get filetype
         mimetype_pic = picr.mimetype
         mimetype_mica = micar.mimetype
-
-
 
         # Get filetype after checking if there are images given
         if request.files['picz'].filename !='':
@@ -495,9 +494,22 @@ def main():
                 apimage = npapimg.copy() 
                 apimage = cv2.cvtColor(apimage,cv2.COLOR_BGR2RGB) #convert colors otherwise they are shifted
                 height, width, channels = apimage.shape 
+                logging.info('width before resizing is '+str(width)) #!#
+                logging.info('height before resizing is '+str(height)) #!#
                 
-                # Resizing  
-                f = float(0.70*screen_height)/float(height)
+                # Resizing #!# showing how to handle non-square shaped pictures
+                if width != height:
+                    logging.info('width and height are not the same')
+                    if width > height:
+                        logging.info('width is higher than height')
+                        f = float(0.70*screen_height)/float(width)
+                    else: 
+                        logging.info('height is higher than width')
+                        f = float(0.70*screen_height)/float(height)
+                else:
+                    f = float(0.70*screen_height)/float(height)
+
+                # Resize 
                 apimage = cv2.resize(apimage, None, fx=f, fy=f) 
                 height, width, channels = apimage.shape
                 apimage_orig = apimage
@@ -519,42 +531,88 @@ def main():
                 apimagez = npapimgz.copy() 
                 apimagez = cv2.cvtColor(apimagez,cv2.COLOR_BGR2RGB) #convert colors otherwise they are shifted
                 height, width, channels = apimagez.shape 
+                logging.info('width before resizing is '+str(width)) #!#
+                logging.info('height before resizing is '+str(height)) #!#
+
+                # Resizing #!# showing how to handle non-square shaped pictures
+                if width != height:
+                    logging.info('width and height are not the same')
+                    if width > height:
+                        logging.info('width is higher than height')
+                        f = float(0.70*screen_height)/float(width)
+                    else: 
+                        logging.info('height is higher than width')
+                        f = float(0.70*screen_height)/float(height)
+                else:
+                    f = float(0.70*screen_height)/float(height)
                 
-                # Resizing  
-                f = float(0.70*screen_height)/float(height)
+                # Resize
                 apimagez = cv2.resize(apimagez, None, fx=f, fy=f) 
                 height, width, channels = apimagez.shape
                 location = os.path.join(uploadspath,filenamez)
                 cv2.imwrite(location,apimagez) 
+                
 
-            # Apatite imgz: if there is an image given
+            # Apatite img_epi: if there is an image given
             if request.files['pic_epi'].filename != '':
                 apimgepi = Image.open(request.files['pic_epi'].stream)
                 npapimgepi = np.array(apimgepi)
                 apimageepi = npapimgepi.copy() 
                 apimageepi = cv2.cvtColor(apimageepi,cv2.COLOR_BGR2RGB) #convert colors otherwise they are shifted
                 height, width, channels = apimageepi.shape 
+                logging.info('width before resizing is '+str(width)) #!#
+                logging.info('height before resizing is '+str(height)) #!#
                 
-                # Resizing  
-                f = float(0.70*screen_height)/float(height)
+                # Resizing #!# showing how to handle non-square shaped pictures
+                if width != height:
+                    logging.info('width and height are not the same')
+                    if width > height:
+                        logging.info('width is higher than height')
+                        f = float(0.70*screen_height)/float(width)
+                    else: 
+                        logging.info('height is higher than width')
+                        f = float(0.70*screen_height)/float(height)
+                else:
+                    f = float(0.70*screen_height)/float(height)
+                    
                 apimageepi = cv2.resize(apimageepi, None, fx=f, fy=f) 
                 height, width, channels = apimageepi.shape
                 location = os.path.join(uploadspath,filenameepi)
                 cv2.imwrite(location,apimageepi) 
                         
             # Scaling: find parameters for a 100 µm on 100 µm window to slice the photo's
-            px = float(widthpx)*f
+            logging.info('width after resizing is '+str(width)) #!#
+            logging.info('height after resizing is '+str(height)) #!#
+
+            px = float(width) #!#
+            px_r = float(height) #!#
             dist = float(widthm)
-            s1 = round(0.5*(px-(px*100)/dist))
-            logging.info('s1 is '+str(s1))
-            s2 = round(float(px) - float(s1)) 
-            logging.info('s2 is '+str(s2))
+
+            # Find parameters for 100 on 100µm window
+            x1 = round(0.5*(px-(px*100)/dist))
+            logging.info('x1 is ' + str(x1))
+            x2 = round(float(px) - float(x1))
+            logging.info('x2 is '+str(x2))
+
+            # Get height of the picture 
+            height_picture_µm = px_r*(widthm/px)
+            logging.info('height picture in µm: '+str(height_picture_µm))
+
+            y1 = round(0.5*(px_r-(px_r*100)/height_picture_µm))
+            logging.info('y1 is '+str(y1))
+            y2 = round(float(px_r) - float(y1))             
+            logging.info('y2 is '+str(y2))
 
             # Scaling: find parameters for a 70 µm on 70 µm window to slice the photo's
-            s3 = round(0.5*(px-(px*70)/dist))
-            logging.info('s3 is '+str(s3))
-            s4 = round(float(px) - float(s3)) 
-            logging.info('s4 is '+str(s4))
+            x3 = round(0.5*(px-(px*70)/dist))
+            logging.info('x3 is '+str(x3))
+            x4 = round(float(px) - float(x3)) 
+            logging.info('x4 is '+str(x4))
+
+            y3 = round(0.5*(px_r-(px_r*70)/height_picture_µm))
+            logging.info('y3 is '+str(y3))
+            y4 = round(float(px_r) - float(y3))             
+            logging.info('y4 is '+str(y4))
 
             #--------------------------------------------------------------------------------------------
             # ---------------------------------- Region of interest-------------------------------------- 
@@ -612,7 +670,7 @@ def main():
                 # Calculate area of polygon
                 mask = np.full_like(apimage,(0,0,0))        
                 
-                polygon_points_square = [(s1,s1),(s2,s1),(s2,s2),(s1,s2)]
+                polygon_points_square = [(x1,y1),(x2,y1),(x2,y2),(x1,y2)] #!#
                 logging.info('type of polygon_points_square')
                 logging.info(type(polygon_points_square))
 
@@ -634,7 +692,7 @@ def main():
                 # Calculate area of polygon
                 mask = np.full_like(apimage,(0,0,0))        
                 
-                polygon_points_square = [(s3,s3),(s4,s3),(s4,s4),(s3,s4)]
+                polygon_points_square = [(x3,y3),(x4,y3),(x4,y4),(x3,y4)]
                 logging.info('type of polygon_points_square')
 
                 area = PolygonArea(polygon_points_square, width)
@@ -763,7 +821,7 @@ def main():
             
             #Executing SQL Statements 
             sql = "INSERT INTO img (customname,name,method,regionofinterest,widthm,widthpx,date,resolution,ms,ip,labelimg_auto) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" 
-            val = (str(customname),str(filename),str(mineral),str(roi),str(widthm),str(widthpx),str(date),str(screen_height),str(ms),str(ip_address), str(labelimg_string)) 
+            val = (str(customname),str(filename),str(mineral),str(roi),str(widthm),str(width),str(date),str(screen_height),str(ms),str(ip_address), str(labelimg_string)) #!# changed widthpx to width
             cur.execute(sql,val)
 
             # Saving the actions performed on the database
@@ -861,9 +919,22 @@ def main():
                 micaimage = npmicaimg.copy() 
                 micaimage = cv2.cvtColor(micaimage,cv2.COLOR_BGR2RGB) #convert colors otherwise they are shifted
                 height, width, channels = micaimage.shape 
+                logging.info('width before resizing is '+str(width)) #!#
+                logging.info('height before resizing is '+str(height)) #!#
                 
-                # Resizing  
-                f = float(0.70*screen_height)/float(height)
+                # Resizing #!# showing how to handle non-square shaped pictures
+                if width != height:
+                    logging.info('width and height are not the same')
+                    if width > height:
+                        logging.info('width is higher than height')
+                        f = float(0.70*screen_height)/float(width)
+                    else: 
+                        logging.info('height is higher than width')
+                        f = float(0.70*screen_height)/float(height)
+                else:
+                    f = float(0.70*screen_height)/float(height)
+
+                # Resize
                 micaimage = cv2.resize(micaimage, None, fx=f, fy=f) 
                 height, width, channels = micaimage.shape
                 micaimage_orig = micaimage
@@ -885,9 +956,22 @@ def main():
                 micaimagez = npmicaimgz.copy() 
                 micaimagez = cv2.cvtColor(micaimagez,cv2.COLOR_BGR2RGB) #convert colors otherwise they are shifted
                 height, width, channels = micaimagez.shape 
+                logging.info('width before resizing is '+str(width)) #!#
+                logging.info('height before resizing is '+str(height)) #!#
                 
-                # Resizing  
-                f = float(0.70*screen_height)/float(height)
+                # Resizing #!# showing how to handle non-square shaped pictures
+                if width != height:
+                    logging.info('width and height are not the same')
+                    if width > height:
+                        logging.info('width is higher than height')
+                        f = float(0.70*screen_height)/float(width)
+                    else: 
+                        logging.info('height is higher than width')
+                        f = float(0.70*screen_height)/float(height)
+                else:
+                    f = float(0.70*screen_height)/float(height)
+                
+                # Resize
                 micaimagez = cv2.resize(micaimagez, None, fx=f, fy=f) 
                 height, width, channels = micaimagez.shape
                 location = os.path.join(uploadspath,filename_micaz)
@@ -904,27 +988,59 @@ def main():
                 micaimageepi = npmicaimgepi.copy() 
                 micaimageepi = cv2.cvtColor(micaimageepi,cv2.COLOR_BGR2RGB) #convert colors otherwise they are shifted
                 height, width, channels = micaimageepi.shape 
+                logging.info('width before resizing is '+str(width)) #!#
+                logging.info('height before resizing is '+str(height)) #!#
                 
-                # Resizing  
-                f = float(0.70*screen_height)/float(height)
+                # Resizing #!# showing how to handle non-square shaped pictures
+                if width != height:
+                    logging.info('width and height are not the same')
+                    if width > height:
+                        logging.info('width is higher than height')
+                        f = float(0.70*screen_height)/float(width)
+                    else: 
+                        logging.info('height is higher than width')
+                        f = float(0.70*screen_height)/float(height)
+                else:
+                    f = float(0.70*screen_height)/float(height)
+
+                # Resize
                 micaimageepi = cv2.resize(micaimageepi, None, fx=f, fy=f) 
                 height, width, channels = micaimageepi.shape
                 location = os.path.join(uploadspath,filename_mica_epi)
                 cv2.imwrite(location,micaimageepi) 
                         
-            # Scaling: find parameters for a 100 µm on 100 µm window to slice the photo's
-            px = float(widthpx)*f
+            # Get height of the picture 
+            px = float(width) #!#
+            px_r = float(height) #!#
             dist = float(widthm)
-            s1 = round(0.5*(px-(px*100)/dist))
-            logging.info('s1 is '+str(s1))
-            s2 = round(float(px) - float(s1)) 
-            logging.info('s2 is '+str(s2))
+            height_picture_µm = px_r*(widthm/px)
+            logging.info('height picture in µm: '+str(height_picture_µm))
+
+            # Find parameters for 100 on 100µm window
+            x1 = round(0.5*(px-(px*100)/dist))
+            logging.info('x1 is ' + str(x1))
+            x2 = round(float(px) - float(x1))
+            logging.info('x2 is '+str(x2))
+
+            # Get height of the picture 
+            height_picture_µm = px_r*(widthm/px)
+            logging.info('height picture in µm: '+str(height_picture_µm))
+
+            y1 = round(0.5*(px_r-(px_r*100)/height_picture_µm))
+            logging.info('y1 is '+str(y1))
+            y2 = round(float(px_r) - float(y1))             
+            logging.info('y2 is '+str(y2))
 
             # Scaling: find parameters for a 70 µm on 70 µm window to slice the photo's
-            s3 = round(0.5*(px-(px*70)/dist))
-            logging.info('s3 is '+str(s3))
-            s4 = round(float(px) - float(s3)) 
-            logging.info('s4 is '+str(s4))
+            x3 = round(0.5*(px-(px*70)/dist))
+            logging.info('x3 is '+str(x3))
+            x4 = round(float(px) - float(x3)) 
+            logging.info('x4 is '+str(x4))
+
+            y3 = round(0.5*(px_r-(px_r*70)/height_picture_µm))
+            logging.info('y3 is '+str(y3))
+            y4 = round(float(px_r) - float(y3))             
+            logging.info('y4 is '+str(y4))
 
             #--------------------------------------------------------------------------------------------
             # ---------------------------------- Region of interest-------------------------------------- 
@@ -985,7 +1101,7 @@ def main():
                 # Calculate area of polygon
                 mask = np.full_like(micaimage,(0,0,0))        
                 
-                polygon_points_square = [(s1,s1),(s2,s1),(s2,s2),(s1,s2)]
+                polygon_points_square = [(x1,y1),(x2,y1),(x2,y2),(x1,y2)] #!#
                 logging.info('type of polygon_points_square')
                 logging.info(type(polygon_points_square))
                 logging.info(type(polygon_points_square[0]))
@@ -1007,10 +1123,8 @@ def main():
 
                 # Calculate area of polygon
                 mask = np.full_like(micaimage,(0,0,0))        
-                logging.info('s3 is'+str(s3))                
-                logging.info('s4 is'+str(s4))
 
-                polygon_points_square = [(s3,s3),(s4,s3),(s4,s4),(s3,s4)]
+                polygon_points_square = [(x3,y3),(x4,y3),(x4,y4),(x3,y4)]
                 logging.info('type of polygon_points_square')
                 logging.info(type(polygon_points_square))
                 logging.info(type(polygon_points_square[0]))
@@ -1142,7 +1256,7 @@ def main():
             
             #Executing SQL Statements 
             sql = "INSERT INTO img (customname,name,method,regionofinterest,widthm,widthpx,date,resolution,ms,ip,labelimg_auto) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" 
-            val = (str(customname),str(filename_mica),str(mineral),str(roi),str(widthm),str(widthpx),str(date),str(screen_height),str(ms),str(ip_address),str(labelimg_string)) 
+            val = (str(customname),str(filename_mica),str(mineral),str(roi),str(widthm),str(width),str(date),str(screen_height),str(ms),str(ip_address),str(labelimg_string)) 
             cur.execute(sql,val)
 
             # Saving the actions performed on the database
@@ -1238,9 +1352,22 @@ def main():
                 micaimage = npmicaimg.copy() 
                 micaimage = cv2.cvtColor(micaimage,cv2.COLOR_BGR2RGB) #convert colors otherwise they are shifted
                 height, width, channels = micaimage.shape 
-                
-                # Resizing  
-                f = float(0.70*screen_height)/float(height)
+                logging.info('width before resizing is '+str(width)) #!#
+                logging.info('height before resizing is '+str(height)) #!#
+
+                # Resizing #!# showing how to handle non-square shaped pictures
+                if width != height:
+                    logging.info('width and height are not the same')
+                    if width > height:
+                        logging.info('width is higher than height')
+                        f = float(0.70*screen_height)/float(width)
+                    else: 
+                        logging.info('height is higher than width')
+                        f = float(0.70*screen_height)/float(height)
+                else:
+                    f = float(0.70*screen_height)/float(height)
+
+                # Resize
                 micaimage = cv2.resize(micaimage, None, fx=f, fy=f) 
                 height, width, channels = micaimage.shape
                 micaimage_orig = micaimage
@@ -1262,9 +1389,22 @@ def main():
                 micaimagez = npmicaimgz.copy() 
                 micaimagez = cv2.cvtColor(micaimagez,cv2.COLOR_BGR2RGB) #convert colors otherwise they are shifted
                 height, width, channels = micaimagez.shape 
+                logging.info('width before resizing is '+str(width)) #!#
+                logging.info('height before resizing is '+str(height)) #!#
                 
-                # Resizing  
-                f = float(0.70*screen_height)/float(height)
+                # Resizing #!# showing how to handle non-square shaped pictures
+                if width != height:
+                    logging.info('width and height are not the same')
+                    if width > height:
+                        logging.info('width is higher than height')
+                        f = float(0.70*screen_height)/float(width)
+                    else: 
+                        logging.info('height is higher than width')
+                        f = float(0.70*screen_height)/float(height)
+                else:
+                    f = float(0.70*screen_height)/float(height)
+
+                # Resize
                 micaimagez = cv2.resize(micaimagez, None, fx=f, fy=f) 
                 height, width, channels = micaimagez.shape
                 location = os.path.join(uploadspath,filename_micaz)
@@ -1281,16 +1421,32 @@ def main():
                 micaimageepi = npmicaimgepi.copy() 
                 micaimageepi = cv2.cvtColor(micaimageepi,cv2.COLOR_BGR2RGB) #convert colors otherwise they are shifted
                 height, width, channels = micaimageepi.shape 
+                logging.info('width before resizing is '+str(width)) #!#
+                logging.info('height before resizing is '+str(height)) #!#
                 
-                # Resizing  
-                f = float(0.70*screen_height)/float(height)
+                # Resizing #!# showing how to handle non-square shaped pictures
+                if width != height:
+                    logging.info('width and height are not the same')
+                    if width > height:
+                        logging.info('width is higher than height')
+                        f = float(0.70*screen_height)/float(width)
+                    else: 
+                        logging.info('height is higher than width')
+                        f = float(0.70*screen_height)/float(height)
+                else:
+                    f = float(0.70*screen_height)/float(height)
+
+                # Resize
                 micaimageepi = cv2.resize(micaimageepi, None, fx=f, fy=f) 
                 height, width, channels = micaimageepi.shape
                 location = os.path.join(uploadspath,filename_mica_epi)
                 cv2.imwrite(location,micaimageepi) 
                         
             # Scaling: find parameters for a 100 µm on 100 µm window to slice the photo's
-            px = float(widthpx)*f
+            logging.info('width after resizing is '+str(width)) #!#
+            logging.info('height after resizing is '+str(height)) #!#
+
+            px = float(width) #!#
             dist = float(widthm)
 
             #--------------------------------------------------------------------------------------------
@@ -1315,7 +1471,7 @@ def main():
 
             # Send info to the database 
             sql = "INSERT INTO img (customname,name,method,regionofinterest,widthm,widthpx,date,resolution,ms,ip,labelimg_auto) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" 
-            val = (str(customname),str(filename_mica),str(mineral),str(roi),str(widthm),str(widthpx),str(date),str(screen_height),str(ms),str(ip_address), 'n/a') 
+            val = (str(customname),str(filename_mica),str(mineral),str(roi),str(widthm),str(width),str(date),str(screen_height),str(ms),str(ip_address), 'n/a') #!#
             cur.execute(sql,val)
 
             # Saving the actions performed on the database
