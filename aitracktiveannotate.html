@@ -83,15 +83,49 @@
                     Please indicate the false positives (misidentified tracks) by dragging rectangles using <b> right </b> mouse button
                 </p> 
                 <!-- source: https://stackoverflow.com/questions/42601478/flask-calling-python-function-on-button-onclick-event -->
-                <button type="button" onclick="submit_entry()" id="senddata" >Click here when ready </button>
-                <a href = {{ url_for('aitracktive2ndpage', filename = filename ) }} style="color:rgb(19, 39, 218);" id='link'> Download data and annotated image </a>
+                <button type="button" onclick="submit_entry()" id="senddata" data-toggle="modal" data-target="#myModal">Click here when ready </button>
+                <!-- <a href = {{ url_for('aitracktive2ndpage', filename = filename ) }} style="color:rgb(19, 39, 218);" id='link'> Download data and annotated image </a> -->
 
-                <canvas id="myCanvas" width = "" height = "" style="border:1px solid #d3d3d3;"> Your browser does not support the HTML5 canvas tag.</canvas>
+                <canvas id="myCanvas" width = "" height = "" style="border:1px solid #d3d3d3;" > Your browser does not support the HTML5 canvas tag.</canvas>
 
                 <p> <a href="https://aitracktive.ugent.be/setsettings?" style="color:rgb(19, 39, 218);"> Analyse another grain </a> 
                     <span class="output"></span>   
                 </p>
-        
+
+                <!-- The Modal -->
+                <div class="modal fade" id="myModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <!-- Modal Header -->
+                            <div class="modal-header">
+                            <h4 class="modal-title">Manual track annotation ready</h4>
+                            <button type="button" class="close" data-dismiss="modal">×</button>
+                            </div>
+                            
+                            <!-- Modal body -->
+                            <div class="modal-body">
+                            Area is <span id='areaspan'> </span> µm² <br> 
+                            Deep Neural Network found <span id='autotracksspan'></span> tracks <br>
+                            False negatives: <span id='fn'></span> <br>
+                            False positives: <span id='fp'></span> <br>
+                            Total # tracks: <span id='total'> </span> <br>
+                            Polygon used is: <span id='pol'> </span> <br>
+
+
+                            <a href = {{ url_for('aitracktive2ndpage', filename = filename ) }} style="color:rgb(19, 39, 218);" id='link'> Download data and annotated image </a>
+                            </div>
+                            
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+                                
+                            <button type="button" class="btn btn-primary" data-dismiss="modal"> Close </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
             </div>
 
             <div class='col-sm-6t'>    
@@ -103,6 +137,11 @@
 
                 <input type='text' class='form-control' id='name' value= {{ filename }} hidden>
                 <input type='text' class='form-control' id='mineral' value= {{ mineral }} hidden>
+                <input type='text' class='form-control' id='autotracks' value= {{ autotracks }} hidden>
+                <input type='text' class='form-control' id='area' value= {{ area }} hidden>
+                <input type='text' class='form-control' id='polygon' value= {{ polygonsending }} hidden>
+                <input type='text' class='form-control' id='roi' value= {{ roi }} hidden>
+
 
                 <label for="cross-fader">Opacity</label>
                 <input type="range" id="cross-fader" name="cross_fader" min="0" max="10" value="5" />
@@ -158,8 +197,26 @@
                 var imgfront = document.getElementById("front");
                 var imgback = document.getElementById("back");
                 var imgepi = document.getElementById("epi");
+
+                // Get number of automatedly found tracks 
+                console.log('autotracks are:');
+                var autotracks = document.getElementById('autotracks');
+                console.log(autotracks.value);
+
+                console.log('area is:');
+                var area = Number(document.getElementById('area'));
+                console.log(area.value);
+
+                var roi = document.getElementById('roi');
+                console.log('roi value')
+                console.log(roi.value);
+
+
+                
+
+
             };      
-        
+            
             // Get zoom values from browser
             window.addEventListener("resize", getSizes, false);
             let out = document.querySelector(".output");
@@ -312,8 +369,38 @@
                 alert("Red Rectangles:\n"+strRed+"\nGreen Rectangles:\n"+strGreen);
             }
 
+
+
             // Try with fetch source
             function submit_entry() {
+                // Get values for modal
+                document.getElementById('fn').innerHTML = arrGreen.length;
+                document.getElementById('fp').innerHTML = arrRed.length;
+                document.getElementById('autotracksspan').innerHTML = autotracks.value;
+                document.getElementById('areaspan').innerHTML = area.value;
+                
+                var total = Number(autotracks.value) + Number(arrGreen.length) - Number(arrRed.length);
+                document.getElementById('total').innerHTML = total;
+                
+                var pol = document.getElementById('polygon');
+                console.log('pol value');
+                console.log(pol.value);
+                //document.getElementById('pol').innerHTML = String(pol.value);
+
+                var roi = document.getElementById('roi');
+                console.log('roi value');
+                console.log(roi.value);
+                //document.getElementById('roi').innerHTML = String(roi.value);
+
+                if (roi.value == 'polygon') {
+                    console.log('polygonal roi');
+                    document.getElementById('pol').innerHTML = String(pol.value);
+                } else {
+                    console.log('something else than a polygon');
+                    document.getElementById('pol').innerHTML = String('n/a');
+                }
+
+                // 
                 var name = document.getElementById('name');
                 var mineral = document.getElementById('mineral');
                 var height = 0.70 * screen.height; // get width of the resized image 

@@ -113,7 +113,7 @@ canvas {  /* geen scrollbars */
         <label for="file" style="cursor: pointer;"> <u> 1. Upload Image </u> </label> <br>
         <label for="chkpoly"> 2. Show image by clicking on the checkbox</label> 
         <input type="checkbox" id="chkpoly" onclick="myCanvasfunction();"/> <br>
-        3. Draw polygon using left mouse button. Doubleclick on your last point to end and obtain the coordinates. <br></p>
+        3. Draw polygon using left mouse button. Doubleclick on left mouse button on your last point and then the polygon should be closed and a list should appear below. Start the application. <br></p>
     
         <div class ='row'> 
           <div class="col-sm-8">
@@ -123,7 +123,7 @@ canvas {  /* geen scrollbars */
       </div>
 
       <div class = 'row' id ='row4'>
-        <canvas id="myCanvas" width="2000" height="2000" style="border:1px solid #d3d3d3;"> Your browser does not support the HTML canvas tag. </canvas>
+        <canvas id="myCanvas" width="2000" height="2000" style="border:1px solid #d3d3d3;" oncontextmenu="return false;"> Your browser does not support the HTML canvas tag. </canvas>
       </div>
 
       <div class = 'row' id ='row7'>
@@ -163,6 +163,7 @@ canvas {  /* geen scrollbars */
         console.log(canvasx);
         console.log('canvas y is...');
         console.log(canvasy);
+
 
         // Hide them again
         row1.style.display = "none";
@@ -352,9 +353,12 @@ canvas {  /* geen scrollbars */
 
       //Mousedown
       $(canvas).on('mousedown', function(e) {
-        mousex = parseInt(e.clientX - canvasx); 
-        mousey = parseInt(e.clientY - canvasy + s );
+        var resscale = Math.round(window.devicePixelRatio*100);
         console.log(' ');
+        console.log('browserZoomLevel is:');
+        console.log(resscale);
+        mousex = parseInt(e.clientX - canvasx); 
+        mousey = parseInt(e.clientY - canvasy + s);
         console.log('e clienty');
         console.log(e.clientY);
         console.log('canvasy');
@@ -373,7 +377,7 @@ canvas {  /* geen scrollbars */
       $(canvas).on('mouseup', function(e) {
         mousedown = false;
         mousex = parseInt(e.clientX - canvasx); 
-        mousey = parseInt(e.clientY - canvasy + s ); 
+        mousey = parseInt(e.clientY - canvasy + s); 
 
       if (mousedown==false) { 
           if (len == 0) { 
@@ -406,13 +410,15 @@ canvas {  /* geen scrollbars */
 
       //Mousemove
       $(canvas).on('mousemove', function(e) {
-        mousex = parseInt(e.clientX - canvasx); 
-        s = window.pageYOffset;
-        mousey = parseInt(e.clientY - canvasy + s ); 
+        mousex = parseInt(e.clientX - canvasx);
+        var resscale = window.devicePixelRatio*100;
+        s = window.pageYOffset; 
+        canvasy = row4.offsetTop;
+        mousey = parseInt(e.clientY - canvasy + s); 
         });
 
       // Get device zoom
-      var resscale = window.devicePixelRatio;
+      var resscale = window.devicePixelRatio*100;
       console.log('resscale');
       console.log(resscale);
       console.log('res is');

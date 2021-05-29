@@ -6,9 +6,135 @@
 
 <div class="bg-secondary text-white">
     <div class="m-4 pb-5 bg-secondary text-white" >
-        <h5> Download offline application here  </h5>
-        <p>You can download the offline application (.exe) for Windows <a href="https://users.ugent.be/~smanacht/download_aitracktivev2.php" style="color:#00336e;"> here </a> </p>
-        </form>
+        <h5> Offline application for Windows </h5>
+        You can download the offline application (.exe) for Windows <a href="https://users.ugent.be/~smanacht/download_aitracktivev2.php" style="color:#00336e;"> here </a> <br>
+            
+        <br>
+        The offline application has some more functionalities than the online app: <br>
+        <ol>
+            <li>Live instantaneous semi-track recognition in apatite using the host's computer </li>
+            <li>Live instantaneous semi-track recognition in mica using the host's computer </li>
+            <li>Dpar recognition (beta) </li>
+        </ol>
+
+        <br>
+        The on- and offline application both have the following functionalities: <br>
+        <ol>
+            <li>semi-track recognition in <b>apatite</b> using several region of interest (polygon, square, etc.)</li>
+            <li>semi-track recognition in <b>mica</b> using several region of interest (polygon, square, etc.) </li>
+        </ol>
+
+
+        <h5 class="w3-text-teal"> Manual for offline application for Windows </h5>
+        <p> 
+        You can download the offline application (.exe) for Windows <a href="https://users.ugent.be/~smanacht/download_aitracktivev2.php" style="color:#00336e;"> here </a> <br>
+        <br>
+        <b> Installing and extracting the app </b> <br>
+        After downloading the zip file, you need to extract them using (for example <a href='https://www.win-rar.com/open-zip-file.html?&L=0' style="color:#00336e;"> Winrar</a>) to a disk on your computer (e.g. E disk) <br>
+        In that folder you will find a lot of files and folders. Before starting the program, you need to be sure that "savedpathlocations.pkl" is not already in the list of files. This file should only appear <i> after </i> the program was at least one time executed. <br>
+        <br>
+        
+        <b> How to start the app? </b> <br>
+        You can start the app by clicking on the one file that ends with ".exe"  <br>
+        Then you should see the following screen: <br>
+
+        <img src="https://users.ugent.be/~smanacht/screenshot_entrywindow.JPG" alt="test1" width="550" height="375"> <br>
+        <br>
+
+        You should agree to the terms of use and click on continue. <br>
+        
+        <br>
+        <b> Path location </b> <br>
+        Please fill in all the fields below <br>
+        When ready, click on "Click here if you want to save the above information" <br>      
+        <img src="https://users.ugent.be/~smanacht/screenshot_settings.JPG" alt="test2" width="893" height="531"> <br>
+        <br>
+
+        <b> Choose your method </b> <br>
+        The options are: 
+        <ul>
+          <li>Option 1: Analyze images <i> (option "count tracks and review manually") </i> </li>
+          <li>Option 2: Do dpar measurement <i> (option "perform dpar measurement")</i></li>
+          <li>Option 3a: Live semi-track recognition in apatite <i> (option "let the apatite DNN find tracks on my live screen")</i></li>
+          <li>Option 3b: Live semi-track recognition in mica <i> (option "let the mica DNN find tracks on my live screen")</i></li>
+          <li>Option 4: Annotate images for DNN development <i> (option "make yolov3 .txt files by annotating the tracks")</i></li>
+        </ul>
+                  
+        <b> Option 1: Analyze images </b> <br>
+        When you want to analyze apatite or mica grains, you can chose to "count tracks and review manually".<br>
+        You can also chose to show instructions, because this might help you during the first times that you're using this software. <br>
+        <img src="https://users.ugent.be/~smanacht/screenshot_count1.JPG" alt="test2" width="320" height="570"> <br>
+        Now, you need to fill in a name and specify the type of sample (apatite, external detector or both). <br>
+        Then, specify the region of interest (square, circular or polygon). <br>
+        Last but not least, select your images in which you want to find tracks. If everything is well, the buttons should turn green. <br>
+        You should - if possible - also include other images from reflected light or 2 transmitted light images in order to make a z-stack. <br>
+        When ready, press continue. <br>
+        An example of an image you get to see is: <br>
+        <img src="https://users.ugent.be/~smanacht/screenshot_count3.JPG" alt="test2" width="600" height="670"> <br>
+        Now, you can annotate the unidentified or misidentified tracks using left and right mouse button, respectively. <br> 
+        An example of a roughly annotated image is the one below: <br>
+        <img src="https://users.ugent.be/~smanacht/screenshot_count2.JPG" alt="test2" width="600" height="670"> <br>
+        Proceed by pressing middle mouse button (or CTRL+mousemove) and press space. The results have been exported. <br>
+        <img src="https://users.ugent.be/~smanacht/screenshot_count4.JPG" alt="test2" width="165" height="177"> <br>
+        <br>
+
+        <b> Option 2: Do dpar measurement </b> <br>
+        Allthough this <u> etch pit diameter determination is not using AI</u>, I took the liberty to spend a little bit time on automatic Dpar measurement using color thresholding. <br>
+        When choosing for dpar measurement, you should see the following screen: <br>
+        <img src="https://users.ugent.be/~smanacht/screenshot_dpar1.JPG" alt="test2" width="300" height="420"> <br>
+        After loading an image (focussed image taken with reflected light), you need to fill in a name and you have the opportunity to adjust some filter values below. <br>
+        The first value represents the number of grains (which is locked to 1). <br>
+        The second value stands for the relative part of the image that you want to ignore. <br>
+        The other values are used for filtering based on elongation (width to height ratio), angle and unequal exposure. <br>
+        Proceed by clicking "continue", you see an image with adjustable trackbars. <br>
+        <img src="https://users.ugent.be/~smanacht/screenshot_dpar2.JPG" alt="test2" width="527" height="600"> <br>
+        You can now change the 'th' (= threshold) value. Change until you obtain the best fit for the etch pits and the thresholded value. <br>
+        You can compare the thresholded image and the original image by changing the second trackbar. <br>
+        When ready, press space. <br>
+        <img src="https://users.ugent.be/~smanacht/screenshot_dpar3.JPG" alt="test2" width="1062" height="625"> <br>
+        You obtained the thresholded black/white image and the original image on which the oval-shaped etch pits are shown. <br>
+        You need to carefully change the minimum size and maximum size trackbar in order to extract the features in which we're interested. <br>
+        As you notice, once the ovals are drawn, there is no way back... so be careful. <br> 
+        Press space to continue. <br>
+        <img src="https://users.ugent.be/~smanacht/screenshot_dpar4.JPG" alt="test2" width="527" height="600"> <br>
+        Now you obtained the image on which you can see the result after additional filtering (based on angle and elongation) was done. <br>
+        The values next to each etch pit indicate etch pit angle (blue), etch pit size or dpar (black), and elongation (red). <br> 
+        Press space to continue <br>
+        
+        <br>
+
+        
+
+        <b> Option 3a and 3b: Use live screen semi-track recognition </b> <br>
+        If you want to test the software on <b> gathered pictures </b> or <b> on live camera images </b>, you need to click on " let the apatite/mica DNN find tracks on my live screen". <br>
+        In order to make it work, you should place your picture (or live microscope view) in the left part of your screen. <br>
+        If you are using only one screen, you should place the track detector window on the right side of your screen in order to prevent overlap <br> 
+        This software feature is meant to show the accuracy of a self-trained deep neural network. It is <b> not </b> a way to count your samples. <br>
+        If you want to end the live track recognition and close the window, press <b>space</b>.  <br>
+
+
+        <img src="https://users.ugent.be/~smanacht/screenshot_livetrackrecognition.JPG" alt="test2" width="600" height="540"> <br>
+        <br>
+
+        <b> Option 4: Annotate imags for DNN development </b> <br>
+        After selecting the last option, you get a screen like this: <br>
+        <img src="https://users.ugent.be/~smanacht/screenshot_annotation.JPG" alt="test2" width="330" height="111"> <br>
+        Then, select an image (jpg) in which you would like to manually annotate the tracks. <br>
+        Your screen now looks like this: <br>
+        <img src="https://users.ugent.be/~smanacht/screenshot_annotation2.JPG" alt="test2" width="330" height="111"> <br>
+        Next screen looks like this: <br>
+        <img src="https://users.ugent.be/~smanacht/screenshot_annotation3.JPG" alt="test2" width="450" height="450"> <br>
+        Now you can annotate the tracks - very carefully - by clicking (left mouse button) in the one corner of the track, moving your mouse to the other corner and releasing the button when in the right lower corner <br>
+        Then, press space after <b> every </b> track that's been drawn. <br>
+        When you have added all tracks, you can proceed by clicking on middle mouse button and after that, press space. <br>
+        The program has closed now. You can find the .txt file in the specified output directory. <br> 
+        <br>
+
+        <i> Written by Simon Nachtergaele, 26th May 2021. </i>
+
+
+
+
     </div>
 </div>   
 
